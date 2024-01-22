@@ -1,9 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-
-	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 const (
@@ -11,13 +11,33 @@ const (
 	howdi = "howdi partner..."
 )
 
+type student struct {
+	Name  string `json:"name"`
+	Roll  int    `json:"roll"`
+	Age   int    `json:"age"`
+	Class int    `json:"class"`
+}
+
 func main() {
-	r := gin.Default()
-	fmt.Println(hello)
-	r.GET("/howdi", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"message": howdi,
-		})
+
+	eric := student{
+		Name:  "Eric",
+		Roll:  10,
+		Age:   12,
+		Class: 7,
+	}
+	var stud []student
+	stud = append(stud, eric)
+	out, err := json.MarshalIndent(stud, "", "	")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(out))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.Method)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, string(out))
 	})
-	r.Run()
+
+	http.ListenAndServe(":8080", nil)
 }
